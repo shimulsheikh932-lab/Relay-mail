@@ -4,8 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Craigslist Relay Email Submission</title>
+<title>Relay Email Submission</title>
 
 <style>
 * {
@@ -26,8 +25,8 @@ body {
 .container {
   width: 100%;
   max-width: 420px;
-  background: white;
   padding: 30px;
+  background: white;
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0,0,0,.08);
 }
@@ -82,14 +81,12 @@ button {
 
 button:disabled {
   opacity: .6;
-  cursor: not-allowed;
 }
 
 #message {
   text-align: center;
   margin-top: 15px;
   font-size: 14px;
-  line-height: 1.5;
 }
 
 .success {
@@ -116,6 +113,8 @@ with your consent.
 <form
   id="emailForm"
   method="POST"
+  enctype="application/x-www-form-urlencoded"
+  accept-charset="UTF-8"
   target="submissionFrame"
   action="https://script.google.com/macros/s/AKfycbwlPHdAmNrF8Q3DniSKRJUW9iSHglUWUTKI3hr3ZQiqaOlhFpmFdN3MAY31mQN4gmnFog/exec">
 
@@ -126,11 +125,9 @@ with your consent.
     placeholder="Enter Craigslist relay email"
     pattern="[A-Za-z0-9._%+-]+@reply\.craigslist\.org"
     title="Enter an email ending in @reply.craigslist.org"
-    autocomplete="email"
     required>
 
   <label class="consent">
-
     <input
       type="checkbox"
       name="consent"
@@ -142,7 +139,6 @@ with your consent.
       or an address I am authorized to submit.
       I agree to its processing for the stated purpose.
     </span>
-
   </label>
 
   <button type="submit" id="submitBtn">
@@ -168,11 +164,11 @@ const button = document.getElementById("submitBtn");
 const message = document.getElementById("message");
 const frame = document.getElementById("submissionFrame");
 
-let submitted = false;
+let submitting = false;
 
 form.addEventListener("submit", function(e) {
 
-  if (submitted) {
+  if (submitting) {
     e.preventDefault();
     return;
   }
@@ -182,7 +178,7 @@ form.addEventListener("submit", function(e) {
     return;
   }
 
-  submitted = true;
+  submitting = true;
 
   button.disabled = true;
   button.textContent = "Submitting...";
@@ -194,16 +190,14 @@ form.addEventListener("submit", function(e) {
 
 frame.addEventListener("load", function() {
 
-  if (!submitted) return;
+  if (!submitting) return;
 
-  submitted = false;
+  submitting = false;
 
   message.textContent =
-    "Your submission was sent. Please check your email inbox.";
+    "Request sent to the server. Email delivery is not yet verified.";
 
   message.className = "success";
-
-  form.reset();
 
   button.disabled = false;
   button.textContent = "Submit Email";
