@@ -82,12 +82,14 @@ button {
 
 button:disabled {
   opacity: .6;
+  cursor: not-allowed;
 }
 
 #message {
   text-align: center;
   margin-top: 15px;
   font-size: 14px;
+  line-height: 1.5;
 }
 
 .success {
@@ -124,9 +126,11 @@ with your consent.
     placeholder="Enter Craigslist relay email"
     pattern="[A-Za-z0-9._%+-]+@reply\.craigslist\.org"
     title="Enter an email ending in @reply.craigslist.org"
+    autocomplete="email"
     required>
 
   <label class="consent">
+
     <input
       type="checkbox"
       name="consent"
@@ -138,6 +142,7 @@ with your consent.
       or an address I am authorized to submit.
       I agree to its processing for the stated purpose.
     </span>
+
   </label>
 
   <button type="submit" id="submitBtn">
@@ -166,6 +171,12 @@ const frame = document.getElementById("submissionFrame");
 let submitted = false;
 
 form.addEventListener("submit", function(e) {
+
+  if (submitted) {
+    e.preventDefault();
+    return;
+  }
+
   if (!form.reportValidity()) {
     e.preventDefault();
     return;
@@ -178,15 +189,17 @@ form.addEventListener("submit", function(e) {
 
   message.textContent = "Sending your submission...";
   message.className = "";
+
 });
 
 frame.addEventListener("load", function() {
+
   if (!submitted) return;
 
   submitted = false;
 
   message.textContent =
-    "Your request was submitted. Please check your email inbox.";
+    "Your submission was sent. Please check your email inbox.";
 
   message.className = "success";
 
@@ -194,9 +207,10 @@ frame.addEventListener("load", function() {
 
   button.disabled = false;
   button.textContent = "Submit Email";
+
 });
+
 </script>
 
 </body>
-  </html>
-  
+</html>
