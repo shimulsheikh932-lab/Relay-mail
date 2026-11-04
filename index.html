@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Relay Email Submission</title>
 
 <style>
@@ -18,47 +19,60 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background: #f3f5f9;
   font-family: Arial, sans-serif;
-  background: #f1f5f9;
 }
 
 .container {
   width: 100%;
   max-width: 420px;
-  padding: 30px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 25px rgba(0,0,0,.08);
+  background: #fff;
+  padding: 30px 24px;
+  border-radius: 14px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.08);
 }
 
 h2 {
   text-align: center;
-  color: #111827;
+  color: #222;
+  margin-top: 0;
 }
 
-.description {
+.subtitle {
   text-align: center;
-  color: #6b7280;
+  color: #777;
   font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 22px;
+  margin-bottom: 25px;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 9px;
+  color: #333;
 }
 
 input[type="email"] {
   width: 100%;
-  padding: 15px;
-  border: 1px solid #d1d5db;
+  padding: 14px;
+  border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 15px;
-  margin-bottom: 18px;
+  outline: none;
+}
+
+input[type="email"]:focus {
+  border-color: #2563eb;
 }
 
 .consent {
   display: flex;
   align-items: flex-start;
   gap: 9px;
+  margin: 20px 0;
   font-size: 13px;
-  color: #4b5563;
+  color: #555;
   line-height: 1.5;
 }
 
@@ -68,8 +82,7 @@ input[type="email"] {
 
 button {
   width: 100%;
-  padding: 15px;
-  margin-top: 22px;
+  padding: 14px;
   border: none;
   border-radius: 8px;
   background: #2563eb;
@@ -79,29 +92,35 @@ button {
   cursor: pointer;
 }
 
+button:hover {
+  background: #1d4ed8;
+}
+
 button:disabled {
-  opacity: .6;
+  background: #999;
   cursor: not-allowed;
 }
 
 #message {
+  display: none;
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 7px;
   text-align: center;
-  margin-top: 15px;
   font-size: 14px;
   line-height: 1.5;
-  overflow-wrap: anywhere;
 }
 
 .success {
-  color: #15803d;
+  display: block !important;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .error {
-  color: #dc2626;
-}
-
-iframe {
-  display: none;
+  display: block !important;
+  background: #fee2e2;
+  color: #991b1b;
 }
 </style>
 </head>
@@ -110,136 +129,135 @@ iframe {
 
 <div class="container">
 
-<h2>Relay Email Submission</h2>
+  <h2>Relay Email Submission</h2>
 
-<p class="description">
-Submit your own Craigslist relay email address
-with your consent.
-</p>
+  <p class="subtitle">
+    Submit your Craigslist relay email address below.
+  </p>
 
-<form
-  id="emailForm"
-  method="POST"
-  target="submissionFrame"
-  action="https://script.google.com/macros/s/AKfycbwlPHdAmNrF8Q3DniSKRJUW9iSHglUWUTKI3hr3ZQiqaOlhFpmFdN3MAY31mQN4gmnFog/exec">
+  <form id="relayForm">
 
-  <input
-    type="email"
-    name="email"
-    id="email"
-    placeholder="Enter Craigslist relay email"
-    pattern="[A-Za-z0-9._%+-]+@reply\.craigslist\.org"
-    title="Enter an email ending in @reply.craigslist.org"
-    required>
+    <label for="email">Craigslist Relay Email</label>
 
-  <label class="consent">
     <input
-      type="checkbox"
-      name="consent"
-      value="yes"
-      required>
+      type="email"
+      id="email"
+      name="email"
+      placeholder="example@reply.craigslist.org"
+      required
+    >
 
-    <span>
-      I confirm that this is my own email address
-      or an address I am authorized to submit.
-      I agree to its processing for the stated purpose.
-    </span>
-  </label>
+    <div class="consent">
+      <input
+        type="checkbox"
+        id="consent"
+        name="consent"
+        value="yes"
+        required
+      >
 
-  <button type="submit" id="submitBtn">
-    Submit Email
-  </button>
+      <label for="consent">
+        I confirm that I own or am authorized to submit
+        this email address.
+      </label>
+    </div>
 
-</form>
+    <button type="submit" id="submitBtn">
+      Submit Email
+    </button>
 
-<iframe
-  name="submissionFrame"
-  id="submissionFrame"
-  title="Submission response">
-</iframe>
+  </form>
 
-<p id="message" aria-live="polite"></p>
+  <div id="message"></div>
 
 </div>
 
 <script>
-const form = document.getElementById("emailForm");
-const button = document.getElementById("submitBtn");
+
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbzmIIJrrFdQjuYNZLjiKkI-gnCjKC6ovclawWI3Wc16Xp_7Av2m1m5tLrpjciY1RZIbYg/exec";
+
+const form = document.getElementById("relayForm");
 const message = document.getElementById("message");
-const frame = document.getElementById("submissionFrame");
+const button = document.getElementById("submitBtn");
 
 let submitting = false;
-let responseReceived = false;
-let timeoutId;
 
-// Submit form
 form.addEventListener("submit", function(e) {
 
-  if (submitting) {
-    e.preventDefault();
+  e.preventDefault();
+
+  if (submitting) return;
+
+  const email = document.getElementById("email").value.trim();
+  const consent = document.getElementById("consent").checked;
+
+  const emailPattern =
+  /^[A-Za-z0-9._%+-]+@reply\.craigslist\.org$/i;
+
+  if (!emailPattern.test(email)) {
+    showMessage("Please enter a valid Craigslist relay email.", false);
     return;
   }
 
-  if (!form.reportValidity()) {
-    e.preventDefault();
+  if (!consent) {
+    showMessage("Please accept the consent checkbox.", false);
     return;
   }
 
   submitting = true;
-  responseReceived = false;
-
   button.disabled = true;
   button.textContent = "Submitting...";
 
-  message.textContent = "Please wait. Sending your submission...";
   message.className = "";
+  message.style.display = "none";
 
-  timeoutId = setTimeout(function() {
+  const formData = new FormData();
 
-    if (submitting && !responseReceived) {
-      finish(false,
-        "No server confirmation received. Please check your connection and try again.");
-    }
+  formData.append("email", email);
+  formData.append("consent", "yes");
 
-  }, 30000);
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    body: formData
+  })
+  .then(response => response.text())
+  .then(result => {
+
+    // Google Apps Script response may be HTML.
+    // The iframe message method is used below instead.
+
+    showMessage(
+      "Your request has been sent. Please wait for confirmation.",
+      true
+    );
+
+    form.reset();
+
+  })
+  .catch(error => {
+
+    showMessage(
+      "Submission failed. Please try again.",
+      false
+    );
+
+  })
+  .finally(() => {
+
+    submitting = false;
+    button.disabled = false;
+    button.textContent = "Submit Email";
+
+  });
 
 });
 
-// Receive Apps Script response
-window.addEventListener("message", function(event) {
-
-  if (event.source !== frame.contentWindow) return;
-
-  if (!event.data || event.data.type !== "relay-result") return;
-
-  if (!submitting) return;
-
-  responseReceived = true;
-
-  finish(
-    event.data.success === true,
-    event.data.message || "Server response received."
-  );
-
-});
-
-// Finish submission
-function finish(success, text) {
-
-  submitting = false;
-  clearTimeout(timeoutId);
-
-  button.disabled = false;
-  button.textContent = "Submit Email";
+function showMessage(text, success) {
 
   message.textContent = text;
+  message.className = success ? "success" : "error";
 
-  if (success) {
-    message.className = "success";
-    form.reset();
-  } else {
-    message.className = "error";
-  }
 }
 
 </script>
