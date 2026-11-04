@@ -4,10 +4,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Craigslist Relay Email Submission</title>
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -32,7 +35,6 @@ body {
 h2 {
   text-align: center;
   color: #111827;
-  margin-top: 0;
 }
 
 .description {
@@ -61,6 +63,10 @@ input[type="email"] {
   line-height: 1.5;
 }
 
+.consent input {
+  margin-top: 3px;
+}
+
 button {
   width: 100%;
   padding: 15px;
@@ -76,7 +82,6 @@ button {
 
 button:disabled {
   opacity: .6;
-  cursor: not-allowed;
 }
 
 #message {
@@ -85,12 +90,18 @@ button:disabled {
   font-size: 14px;
 }
 
-.success { color: #15803d; }
-.error { color: #dc2626; }
+.success {
+  color: #15803d;
+}
+
+.error {
+  color: #dc2626;
+}
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
 <h2>Relay Email Submission</h2>
@@ -100,84 +111,92 @@ Submit your own Craigslist relay email address
 with your consent.
 </p>
 
-<form id="emailForm">
+<form
+  id="emailForm"
+  method="POST"
+  target="submissionFrame"
+  action="YOUR_GOOGLE_SCRIPT_WEB_APP_URL">
 
-<input
-type="email"
-id="email"
-name="email"
-placeholder="Enter Craigslist relay email"
-pattern="[A-Za-z0-9._%+-]+@reply\.craigslist\.org"
-title="Enter an email ending in @reply.craigslist.org"
-required>
+  <input
+    type="email"
+    name="email"
+    id="email"
+    placeholder="Enter Craigslist relay email"
+    pattern="[A-Za-z0-9._%+-]+@reply\.craigslist\.org"
+    title="Enter an email ending in @reply.craigslist.org"
+    required>
 
-<label class="consent">
-<input type="checkbox" name="consent" value="yes" required>
-<span>
-I confirm that this is my own email address
-or an address I am authorized to submit.
-I agree to its processing for the stated purpose.
-</span>
-</label>
+  <label class="consent">
+    <input
+      type="checkbox"
+      name="consent"
+      value="yes"
+      required>
 
-<button type="submit" id="submitBtn">
-Submit Email
-</button>
+    <span>
+      I confirm that this is my own email address
+      or an address I am authorized to submit.
+      I agree to its processing for the stated purpose.
+    </span>
+  </label>
+
+  <button type="submit" id="submitBtn">
+    Submit Email
+  </button>
 
 </form>
+
+<iframe
+  name="submissionFrame"
+  id="submissionFrame"
+  title="Submission response"
+  style="display:none">
+</iframe>
 
 <p id="message" aria-live="polite"></p>
 
 </div>
 
 <script>
-const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbzLrBF7EZagzQsxK96vGdoR8NeM8192ufJ0JrCuOw-cX_y3AoS6cMLPMiyBSHrjwPEEEA/exec";
-
 const form = document.getElementById("emailForm");
 const button = document.getElementById("submitBtn");
 const message = document.getElementById("message");
+const frame = document.getElementById("submissionFrame");
 
-form.addEventListener("submit", async function(e) {
-  e.preventDefault();
+let submitted = false;
 
-  if (!form.reportValidity()) return;
+form.addEventListener("submit", function(e) {
+  if (!form.reportValidity()) {
+    e.preventDefault();
+    return;
+  }
+
+  submitted = true;
 
   button.disabled = true;
   button.textContent = "Submitting...";
-  message.textContent = "";
+
+  message.textContent = "Sending your submission...";
   message.className = "";
+});
 
-  try {
-    const response = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: new FormData(form)
-    });
+frame.addEventListener("load", function() {
+  if (!submitted) return;
 
-    if (!response.ok) {
-      throw new Error("Server error");
-    }
+  submitted = false;
 
-    const result = await response.json();
+  message.textContent =
+    "Your request was submitted. Please check your email inbox.";
 
-    if (!result.success) {
-      throw new Error(result.message || "Submission failed.");
-    }
+  message.className = "success";
 
-    message.textContent = "Submission successful!";
-    message.className = "success";
-    form.reset();
+  form.reset();
 
-  } catch (error) {
-    message.textContent =
-      "Unable to confirm submission. Please try again.";
-    message.className = "error";
-  } finally {
-    button.disabled = false;
-    button.textContent = "Submit Email";
-  }
+  button.disabled = false;
+  button.textContent = "Submit Email";
 });
 </script>
 
 </body>
-</html>
+  </html>
+  
