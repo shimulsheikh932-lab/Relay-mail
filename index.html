@@ -81,12 +81,15 @@ button {
 
 button:disabled {
   opacity: .6;
+  cursor: not-allowed;
 }
 
 #message {
   text-align: center;
   margin-top: 15px;
   font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .success {
@@ -95,6 +98,10 @@ button:disabled {
 
 .error {
   color: #dc2626;
+}
+
+iframe {
+  display: none;
 }
 </style>
 </head>
@@ -113,8 +120,6 @@ with your consent.
 <form
   id="emailForm"
   method="POST"
-  enctype="application/x-www-form-urlencoded"
-  accept-charset="UTF-8"
   target="submissionFrame"
   action="https://script.google.com/macros/s/AKfycbwlPHdAmNrF8Q3DniSKRJUW9iSHglUWUTKI3hr3ZQiqaOlhFpmFdN3MAY31mQN4gmnFog/exec">
 
@@ -150,8 +155,7 @@ with your consent.
 <iframe
   name="submissionFrame"
   id="submissionFrame"
-  title="Submission response"
-  style="display:none">
+  title="Submission response">
 </iframe>
 
 <p id="message" aria-live="polite"></p>
@@ -165,7 +169,10 @@ const message = document.getElementById("message");
 const frame = document.getElementById("submissionFrame");
 
 let submitting = false;
+let responseReceived = false;
+let timeoutId;
 
+// Submit form
 form.addEventListener("submit", function(e) {
 
   if (submitting) {
@@ -179,30 +186,61 @@ form.addEventListener("submit", function(e) {
   }
 
   submitting = true;
+  responseReceived = false;
 
   button.disabled = true;
   button.textContent = "Submitting...";
 
-  message.textContent = "Sending your submission...";
+  message.textContent = "Please wait. Sending your submission...";
   message.className = "";
+
+  timeoutId = setTimeout(function() {
+
+    if (submitting && !responseReceived) {
+      finish(false,
+        "No server confirmation received. Please check your connection and try again.");
+    }
+
+  }, 30000);
 
 });
 
-frame.addEventListener("load", function() {
+// Receive Apps Script response
+window.addEventListener("message", function(event) {
+
+  if (event.source !== frame.contentWindow) return;
+
+  if (!event.data || event.data.type !== "relay-result") return;
 
   if (!submitting) return;
 
+  responseReceived = true;
+
+  finish(
+    event.data.success === true,
+    event.data.message || "Server response received."
+  );
+
+});
+
+// Finish submission
+function finish(success, text) {
+
   submitting = false;
-
-  message.textContent =
-    "Request sent to the server. Email delivery is not yet verified.";
-
-  message.className = "success";
+  clearTimeout(timeoutId);
 
   button.disabled = false;
   button.textContent = "Submit Email";
 
-});
+  message.textContent = text;
+
+  if (success) {
+    message.className = "success";
+    form.reset();
+  } else {
+    message.className = "error";
+  }
+}
 
 </script>
 
