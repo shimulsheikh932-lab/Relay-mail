@@ -3,218 +3,218 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+<title>Craigslist Relay Email Submission</title>
 
-  <title>Relay Email Submission</title>
+<style>
+* {
+  box-sizing: border-box;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+body {
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
+.container {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
 
-    .container {
-      width: 100%;
-      max-width: 420px;
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-    }
+h2 {
+  text-align: center;
+  color: #111827;
+  margin-top: 0;
+}
 
-    h2 {
-      text-align: center;
-      color: #111827;
-      margin-top: 0;
-      margin-bottom: 12px;
-    }
+.description {
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
 
-    .description {
-      text-align: center;
-      color: #6b7280;
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 22px;
-    }
+input[type="email"] {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 18px;
+}
 
-    input[type="email"] {
-      width: 100%;
-      padding: 15px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      margin-bottom: 18px;
-      font-size: 15px;
-      outline: none;
-    }
+input[type="email"]:focus {
+  outline: none;
+  border-color: #2563eb;
+}
 
-    input[type="email"]:focus {
-      border-color: #2563eb;
-    }
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.5;
+}
 
-    .consent {
-      display: flex;
-      align-items: flex-start;
-      gap: 9px;
-      font-size: 13px;
-      color: #4b5563;
-      line-height: 1.5;
-    }
+.consent input {
+  margin-top: 3px;
+}
 
-    .consent input {
-      margin-top: 3px;
-    }
+button {
+  width: 100%;
+  padding: 15px;
+  margin-top: 22px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 22px;
-      border: none;
-      border-radius: 8px;
-      background: #2563eb;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
-    button:hover {
-      background: #1d4ed8;
-    }
+#message {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  line-height: 1.5;
+}
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+.success {
+  color: #15803d;
+}
 
-    #message {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-      color: #374151;
-    }
-  </style>
-
+.error {
+  color: #dc2626;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h2>Relay Email Submission</h2>
+  <h2>Relay Email Submission</h2>
 
-    <p class="description">
-      Enter your relay email address below.
-    </p>
+  <p class="description">
+    Submit your own Craigslist relay email address
+    with your consent.
+  </p>
 
-    <form
-      id="emailForm"
-      action="https://script.google.com/macros/s/AKfycbxit6vNPjnkojMj_4gdaNKJGEZ6rrEEsLge1A3MKmXUfaWu0udE-2SaYqgS56kyOy_0SQ/exec"
-      method="POST"
-      target="hiddenFrame">
+  <form
+    id="emailForm"
+    action="YOUR_GOOGLE_SCRIPT_WEB_APP_URL"
+    method="POST"
+    target="submissionFrame">
+
+    <input
+      type="email"
+      id="email"
+      name="email"
+      placeholder="Enter Craigslist relay email"
+      pattern="[A-Za-z0-9._%+-]+@reply\.craigslist\.org"
+      title="Enter an email ending in @reply.craigslist.org"
+      required>
+
+    <label class="consent">
 
       <input
-        type="email"
-        name="email"
-        placeholder="Enter your relay email address"
-        autocomplete="email"
+        type="checkbox"
+        name="consent"
+        value="yes"
         required>
 
-      <label class="consent">
+      <span>
+        I confirm that this is my own email address
+        or an address I am authorized to submit.
+        I agree to its processing for the stated purpose.
+      </span>
 
-        <input
-          type="checkbox"
-          name="consent"
-          value="yes"
-          required>
+    </label>
 
-        <span>
-          I agree to submit this email address
-          and understand that it will be processed
-          for the stated purpose.
-        </span>
+    <button type="submit" id="submitBtn">
+      Submit Email
+    </button>
 
-      </label>
+  </form>
 
-      <button
-        type="submit"
-        id="submitBtn">
+  <iframe
+    name="submissionFrame"
+    id="submissionFrame"
+    hidden>
+  </iframe>
 
-        Submit Email
+  <p id="message" aria-live="polite"></p>
 
-      </button>
+</div>
 
-    </form>
+<script>
+const form = document.getElementById("emailForm");
+const button = document.getElementById("submitBtn");
+const message = document.getElementById("message");
+const frame = document.getElementById("submissionFrame");
 
-    <iframe
-      name="hiddenFrame"
-      id="hiddenFrame"
-      style="display:none">
+let submitting = false;
 
-    </iframe>
+form.addEventListener("submit", function(event) {
 
-    <p id="message"></p>
+  if (!form.checkValidity()) {
+    return;
+  }
 
-  </div>
+  if (submitting) {
+    event.preventDefault();
+    return;
+  }
 
-  <script>
+  submitting = true;
 
-    const form =
-      document.getElementById("emailForm");
+  button.disabled = true;
+  button.textContent = "Submitting...";
 
-    const message =
-      document.getElementById("message");
+  message.textContent = "";
+  message.className = "";
+});
 
-    const button =
-      document.getElementById("submitBtn");
+// The iframe load event only confirms a navigation,
+// not that MailApp successfully sent the notification.
+frame.addEventListener("load", function() {
 
-    const iframe =
-      document.getElementById("hiddenFrame");
+  if (!submitting) return;
 
-    let submitted = false;
+  submitting = false;
 
-    form.addEventListener("submit", function() {
+  button.disabled = false;
+  button.textContent = "Submit Email";
 
-      submitted = true;
+  message.textContent =
+    "Request sent. Please allow time for processing.";
 
-      button.disabled = true;
+  message.className = "success";
 
-      button.textContent = "Submitting...";
+  form.reset();
 
-      message.textContent = "";
-
-    });
-
-    iframe.addEventListener("load", function() {
-
-      if (submitted) {
-
-        message.textContent =
-          "Submission received. Thank you!";
-
-        button.textContent = "Submitted";
-
-        submitted = false;
-
-      }
-
-    });
-
-  </script>
+});
+</script>
 
 </body>
-
-  </html>
-  
+</html>
