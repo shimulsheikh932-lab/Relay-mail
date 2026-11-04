@@ -26,7 +26,7 @@ body {
 .container {
   width: 100%;
   max-width: 420px;
-  background: #fff;
+  background: white;
   padding: 30px 24px;
   border-radius: 14px;
   box-shadow: 0 5px 25px rgba(0,0,0,0.08);
@@ -80,6 +80,11 @@ input[type="email"]:focus {
   margin-top: 3px;
 }
 
+.consent label {
+  font-weight: normal;
+  margin: 0;
+}
+
 button {
   width: 100%;
   padding: 14px;
@@ -90,10 +95,6 @@ button {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-}
-
-button:hover {
-  background: #1d4ed8;
 }
 
 button:disabled {
@@ -122,6 +123,10 @@ button:disabled {
   background: #fee2e2;
   color: #991b1b;
 }
+
+iframe {
+  display: none;
+}
 </style>
 </head>
 
@@ -135,7 +140,12 @@ button:disabled {
     Submit your Craigslist relay email address below.
   </p>
 
-  <form id="relayForm">
+  <form
+    id="relayForm"
+    method="POST"
+    target="submitFrame"
+    action="https://script.google.com/macros/s/AKfycbzKalDvOBKH6_x_nyJw0_kWYzmkd8hBGOozhLpbgAPunp1_EJq6wUlg2fj3hNEZe53fZw/exec"
+  >
 
     <label for="email">Craigslist Relay Email</label>
 
@@ -143,11 +153,12 @@ button:disabled {
       type="email"
       id="email"
       name="email"
-      placeholder="example@reply.craigslist.org"
+      placeholder="example@res.craigslist.org"
       required
     >
 
     <div class="consent">
+
       <input
         type="checkbox"
         id="consent"
@@ -160,6 +171,7 @@ button:disabled {
         I confirm that I own or am authorized to submit
         this email address.
       </label>
+
     </div>
 
     <button type="submit" id="submitBtn">
@@ -168,88 +180,99 @@ button:disabled {
 
   </form>
 
+  <iframe name="submitFrame" id="submitFrame"></iframe>
+
   <div id="message"></div>
 
 </div>
 
 <script>
 
-const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbzmIIJrrFdQjuYNZLjiKkI-gnCjKC6ovclawWI3Wc16Xp_7Av2m1m5tLrpjciY1RZIbYg/exec";
-
 const form = document.getElementById("relayForm");
-const message = document.getElementById("message");
 const button = document.getElementById("submitBtn");
+const message = document.getElementById("message");
+const frame = document.getElementById("submitFrame");
+
+const emailInput = document.getElementById("email");
+
+const emailPattern =
+/^[a-z0-9._%+-]+@(?:reply|res)\.craigslist\.org$/i;
 
 let submitting = false;
+let submitTimer;
 
 form.addEventListener("submit", function(e) {
 
-  e.preventDefault();
-
-  if (submitting) return;
-
-  const email = document.getElementById("email").value.trim();
-  const consent = document.getElementById("consent").checked;
-
-  const emailPattern =
-  /^[A-Za-z0-9._%+-]+@reply\.craigslist\.org$/i;
+  const email = emailInput.value.trim();
 
   if (!emailPattern.test(email)) {
-    showMessage("Please enter a valid Craigslist relay email.", false);
+    e.preventDefault();
+    showMessage(
+      "Please enter a valid Craigslist relay email address.",
+      false
+    );
     return;
   }
 
-  if (!consent) {
-    showMessage("Please accept the consent checkbox.", false);
+  if (!document.getElementById("consent").checked) {
+    e.preventDefault();
+    showMessage("Consent is required.", false);
+    return;
+  }
+
+  if (submitting) {
+    e.preventDefault();
     return;
   }
 
   submitting = true;
+
   button.disabled = true;
   button.textContent = "Submitting...";
 
-  message.className = "";
   message.style.display = "none";
 
-  const formData = new FormData();
+  submitTimer = setTimeout(function() {
+    if (submitting) {
+      submitting = false;
+      button.disabled = false;
+      button.textContent = "Submit Email";
 
-  formData.append("email", email);
-  formData.append("consent", "yes");
+      showMessage(
+        "No confirmation received. Please check your connection and try again.",
+        false
+      );
+    }
+  }, 20000);
 
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    body: formData
-  })
-  .then(response => response.text())
-  .then(result => {
+});
 
-    // Google Apps Script response may be HTML.
-    // The iframe message method is used below instead.
+// Receive actual Google Apps Script response
+window.addEventListener("message", function(event) {
 
-    showMessage(
-      "Your request has been sent. Please wait for confirmation.",
-      true
-    );
+  if (event.origin !== "https://script.google.com") {
+    return;
+  }
 
+  const data = event.data;
+
+  if (!data || data.type !== "relay-result") {
+    return;
+  }
+
+  if (!submitting) return;
+
+  clearTimeout(submitTimer);
+  submitting = false;
+
+  button.disabled = false;
+  button.textContent = "Submit Email";
+
+  showMessage(data.message, data.success);
+
+  if (data.success) {
     form.reset();
-
-  })
-  .catch(error => {
-
-    showMessage(
-      "Submission failed. Please try again.",
-      false
-    );
-
-  })
-  .finally(() => {
-
-    submitting = false;
-    button.disabled = false;
-    button.textContent = "Submit Email";
-
-  });
+  }
 
 });
 
@@ -257,6 +280,7 @@ function showMessage(text, success) {
 
   message.textContent = text;
   message.className = success ? "success" : "error";
+  message.style.display = "block";
 
 }
 
@@ -264,3 +288,4 @@ function showMessage(text, success) {
 
 </body>
 </html>
+  
